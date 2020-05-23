@@ -1,14 +1,18 @@
 package user
 
 import (
+	"log"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 )
 
-var connectionString = "root:rootpasswd@tcp(127.0.0.1:3306)/app?autoReconnect=true&useSSL=false"
-
 func openConnection() (*gorm.DB, error) {
-	return gorm.Open("mysql", "root:rootpasswd@(localhost:3306)/app")
+	db, err := gorm.Open("mysql", "root:rootpasswd@(db:3306)/app")
+	if err != nil {
+		log.Panicln(err)
+	}
+	return db, err
 }
 
 // Save - asdf

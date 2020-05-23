@@ -37,12 +37,12 @@ func fetchUserByID(w http.ResponseWriter, r *http.Request) {
 	jsonResponse(w, http.StatusOK, user)
 }
 
-func createUser(w http.ResponseWriter, r *http.Request) {
-	decoder := json.NewDecoder(r.Body)
+func createUser(w http.ResponseWriter, request *http.Request) {
+	decoder := json.NewDecoder(request.Body)
 	var user User
 	errDecode := decoder.Decode(&user)
 	if errDecode != nil {
-		jsonResponse(w, http.StatusInternalServerError, ErrorMessage{Message: "Some problem occurred."})
+		jsonResponse(w, http.StatusInternalServerError, ErrorMessage{Message: "Some problem on decoding the request body"})
 		return
 	}
 
@@ -68,7 +68,7 @@ func deleteUser(w http.ResponseWriter, r *http.Request) {
 func Router() *mux.Router {
 
 	var router *mux.Router
-	
+
 	router = mux.NewRouter().StrictSlash(true)
 
 	router.Path("/users").HandlerFunc(fetchAllUsers).Methods("GET")

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/naspredam/rest-go-users/user"
@@ -10,6 +10,6 @@ import (
 func main() {
 	var port = "8080"
 
-	fmt.Println("Listening on port :" + port)
+	log.Println("Listening on port :" + port)
 	http.ListenAndServe(":"+port, user.Router())
 }
