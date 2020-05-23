@@ -11,5 +11,5 @@ func main() {
 	var port = "8080"
 
 	log.Println("Listening on port :" + port)
-	http.ListenAndServe(":"+port, user.Router())
+	log.Fatal(http.ListenAndServe(":"+port, user.Router()))
 }

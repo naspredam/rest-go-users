@@ -1,5 +1,5 @@
 start:
-	docker build -t rest-go-users .
+	docker build -t rest-go-users -f docker/Dockerfile .
 	docker-compose up -d
 
 stop:
