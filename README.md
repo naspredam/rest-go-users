@@ -5,6 +5,8 @@ This project has as objective to have a rest api build on:
 - Go 1.14
 - MySQL (8.0.20)
 
+To be comparable with jara standard applicaiton, it was used gorm as ORM.
+
 ## What the rest api will stand for?
 
 The rest will have the resource:
