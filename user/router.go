@@ -19,7 +19,9 @@ func jsonResponse(w http.ResponseWriter, code int, payload interface{}) {
 }
 
 func fetchAllUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := FindAll()
+	responseChan := make(chan func() ([]User, error))
+	go FindAll(responseChan)
+	users, err := (<-responseChan)()
 	if err != nil {
 		jsonResponse(w, http.StatusInternalServerError, ErrorMessage{Message: "Could not retrieve the users..."})
 		return
@@ -29,7 +31,9 @@ func fetchAllUsers(w http.ResponseWriter, r *http.Request) {
 
 func fetchUserByID(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
-	user, err := FindByID(id)
+	responseChan := make(chan func() (User, error))
+	go FindByID(id, responseChan)
+	user, err := (<-responseChan)()
 	if err != nil {
 		jsonResponse(w, http.StatusInternalServerError, ErrorMessage{Message: "Could not retrieve the user..."})
 		return
@@ -46,7 +50,9 @@ func createUser(w http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	user, err := Save(user)
+	responseChan := make(chan func() (User, error))
+	go Save(user, responseChan)
+	user, err := (<-responseChan)()
 	if err != nil {
 		jsonResponse(w, http.StatusInternalServerError, ErrorMessage{Message: "Could not save the user..."})
 		return
@@ -56,7 +62,9 @@ func createUser(w http.ResponseWriter, request *http.Request) {
 
 func deleteUser(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
-	err := Delete(id)
+	responseChan := make(chan error)
+	go Delete(id, responseChan)
+	err := <-responseChan
 	if err != nil {
 		jsonResponse(w, http.StatusInternalServerError, ErrorMessage{Message: "Could not connect to the database"})
 		return

@@ -1,13 +1,18 @@
 package user
 
 import (
+	"flag"
 	"log"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 )
 
+var maxNbConcurrentGoroutines = flag.Int("maxNbConcurrentGoroutines", 20, "the number of goroutines that are allowed to run concurrently")
+var concurrentGoroutines = make(chan struct{}, *maxNbConcurrentGoroutines)
+
 func openConnection() (*gorm.DB, error) {
+	concurrentGoroutines <- struct{}{}
 	db, err := gorm.Open("mysql", "root:rootpasswd@(db:3306)/app")
 	if err != nil {
 		log.Panicln(err)
@@ -16,47 +21,51 @@ func openConnection() (*gorm.DB, error) {
 }
 
 // Save - asdf
-func Save(user User) (User, error) {
+func Save(user User, responseChan chan func() (User, error)) {
 	db, err := openConnection()
 	if err != nil {
-		return User{}, err
+		responseChan <- (func() (User, error) { return User{}, err })
 	}
 	defer db.Close()
 	db.Create(&user)
-	return user, nil
+	<-concurrentGoroutines
+	responseChan <- (func() (User, error) { return user, nil })
 }
 
 // FindAll - asdfa
-func FindAll() ([]User, error) {
+func FindAll(responseChan chan func() ([]User, error)) {
 	db, err := openConnection()
 	if err != nil {
-		return nil, err
+		responseChan <- (func() ([]User, error) { return nil, err })
 	}
 	defer db.Close()
 	var users []User
 	db.Find(&users)
-	return users, nil
+	<-concurrentGoroutines
+	responseChan <- (func() ([]User, error) { return users, nil })
 }
 
 // FindByID - asdf
-func FindByID(id string) (User, error) {
+func FindByID(id string, responseChan chan func() (User, error)) {
 	db, err := openConnection()
 	if err != nil {
-		return User{}, err
+		responseChan <- (func() (User, error) { return User{}, err })
 	}
 	defer db.Close()
 	var user User
 	db.First(&user, id)
-	return user, nil
+	<-concurrentGoroutines
+	responseChan <- (func() (User, error) { return user, nil })
 }
 
 // Delete - asdf
-func Delete(id string) error {
+func Delete(id string, responseChan chan error) {
 	db, err := openConnection()
 	if err != nil {
-		return err
+		responseChan <- err
 	}
 	defer db.Close()
 	db.Delete(User{}, "id = ?", id)
-	return nil
+	<-concurrentGoroutines
+	responseChan <- nil
 }

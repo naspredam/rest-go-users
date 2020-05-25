@@ -6,9 +6,9 @@ ADD . /app/
 
 WORKDIR /app
 
-RUN go build -o /urs/bin/main .
-RUN chown go:go /urs/bin/main
+RUN go build -o /urs/bin/service .
+RUN chown go:go /urs/bin/service
 
 USER go
 
-ENTRYPOINT ["/urs/bin/main"]
+ENTRYPOINT ["/urs/bin/service"]
