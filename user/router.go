@@ -69,7 +69,7 @@ func createUser(w http.ResponseWriter, request *http.Request) {
 func deleteUser(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	responseChan := make(chan error)
-	go Delete(id, responseChan)
+	go userRepository.Delete(id, responseChan)
 	err := <-responseChan
 	if err != nil {
 		jsonResponse(w, http.StatusInternalServerError, ErrorMessage{Message: "Could not connect to the database"})

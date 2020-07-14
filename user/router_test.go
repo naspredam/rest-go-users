@@ -8,8 +8,9 @@ import (
 )
 
 var findAll func(responseChan chan func() ([]User, error))
-var save func(user User, responseChan chan func() (User, error))
 var findByID func(id string, responseChan chan func() (User, error))
+var save func(user User, responseChan chan func() (User, error))
+var delete func(id string, responseChan chan error)
 
 type userRepositoryMock struct{}
 
@@ -23,6 +24,10 @@ func (u userRepositoryMock) FindByID(id string, responseChan chan func() (User, 
 
 func (u userRepositoryMock) Save(user User, responseChan chan func() (User, error)) {
 	save(user, responseChan)
+}
+
+func (u userRepositoryMock) Delete(id string, responseChan chan error) {
+	delete(id, responseChan)
 }
 
 func TestGetEmptyUsers(t *testing.T) {
@@ -143,5 +148,33 @@ func TestFetchUserById(t *testing.T) {
 	expected := `{"id":12,"first_name":"Krish","last_name":"Bhanushali","phone":"0987654321"}`
 	if rr.Body.String() != expected {
 		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
+	}
+}
+
+func TestDeleteUserById(t *testing.T) {
+	userRepository = userRepositoryMock{}
+	delete = func(id string, responseChan chan error) {
+		if id != "22" {
+			t.Errorf("Provided user id is not correct. Provided id is %v, expected %v", id, "22")
+		}
+		responseChan <- nil
+	}
+
+	req, err := http.NewRequest("DELETE", "/users/22", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rr := httptest.NewRecorder()
+	handler := Router()
+
+	handler.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusNoContent {
+		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusNoContent)
+		return
+	}
+
+	if rr.Body.String() != "" {
+		t.Errorf("body must be nil")
 	}
 }
