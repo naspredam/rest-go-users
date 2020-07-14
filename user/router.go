@@ -57,7 +57,7 @@ func createUser(w http.ResponseWriter, request *http.Request) {
 	}
 
 	responseChan := make(chan func() (User, error))
-	go Save(user, responseChan)
+	go userRepository.Save(user, responseChan)
 	user, err := (<-responseChan)()
 	if err != nil {
 		jsonResponse(w, http.StatusInternalServerError, ErrorMessage{Message: "Could not save the user..."})
