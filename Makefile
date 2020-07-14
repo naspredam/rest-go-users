@@ -5,8 +5,7 @@ start:
 stop:
 	docker-compose down
 
-restart:
-	make stop && make start
+restart: stop start
 
 logs:
 	docker-compose logs -f

@@ -3,6 +3,7 @@ package user
 import (
 	"flag"
 	"log"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
@@ -13,7 +14,7 @@ var concurrentGoroutines = make(chan struct{}, *maxNbConcurrentGoroutines)
 
 func openConnection() (*gorm.DB, error) {
 	concurrentGoroutines <- struct{}{}
-	db, err := gorm.Open("mysql", "root:rootpasswd@(db:3306)/app")
+	db, err := gorm.Open("mysql", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Panicln(err)
 	}

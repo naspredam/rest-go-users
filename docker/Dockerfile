@@ -1,4 +1,4 @@
-FROM golang:1.14.3-buster
+FROM golang:buster
 
 RUN adduser --disabled-password --gecos '' go
 
