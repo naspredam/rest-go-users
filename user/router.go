@@ -7,6 +7,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var userRepository UserRepository
+
+func init() {
+	userRepository = UserRepositoryStruct{}
+}
+
 func jsonResponse(w http.ResponseWriter, code int, payload interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
@@ -20,7 +26,7 @@ func jsonResponse(w http.ResponseWriter, code int, payload interface{}) {
 
 func fetchAllUsers(w http.ResponseWriter, r *http.Request) {
 	responseChan := make(chan func() ([]User, error))
-	go FindAll(responseChan)
+	go userRepository.FindAll(responseChan)
 	users, err := (<-responseChan)()
 	if err != nil {
 		jsonResponse(w, http.StatusInternalServerError, ErrorMessage{Message: "Could not retrieve the users..."})
