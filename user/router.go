@@ -38,7 +38,7 @@ func fetchAllUsers(w http.ResponseWriter, r *http.Request) {
 func fetchUserByID(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	responseChan := make(chan func() (User, error))
-	go FindByID(id, responseChan)
+	go userRepository.FindByID(id, responseChan)
 	user, err := (<-responseChan)()
 	if err != nil {
 		jsonResponse(w, http.StatusInternalServerError, ErrorMessage{Message: "Could not retrieve the user..."})

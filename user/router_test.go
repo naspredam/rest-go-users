@@ -9,11 +9,16 @@ import (
 
 var findAll func(responseChan chan func() ([]User, error))
 var save func(user User, responseChan chan func() (User, error))
+var findByID func(id string, responseChan chan func() (User, error))
 
 type userRepositoryMock struct{}
 
 func (u userRepositoryMock) FindAll(responseChan chan func() ([]User, error)) {
 	findAll(responseChan)
+}
+
+func (u userRepositoryMock) FindByID(id string, responseChan chan func() (User, error)) {
+	findByID(id, responseChan)
 }
 
 func (u userRepositoryMock) Save(user User, responseChan chan func() (User, error)) {
@@ -105,6 +110,37 @@ func TestCreateNewUser(t *testing.T) {
 
 	// Check the response body is what we expect.
 	expected := `{"id":1,"first_name":"Krish","last_name":"Bhanushali","phone":"0987654321"}`
+	if rr.Body.String() != expected {
+		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
+	}
+}
+
+func TestFetchUserById(t *testing.T) {
+	userRepository = userRepositoryMock{}
+	var userFromRepository = User{ID: 12, FirstName: "Krish", LastName: "Bhanushali", Phone: "0987654321"}
+	findByID = func(id string, responseChan chan func() (User, error)) {
+		if id != "12" {
+			t.Errorf("Provided user id is not correct. Provided id is %v, expected %v", id, "12")
+		}
+		responseChan <- (func() (User, error) { return userFromRepository, nil })
+	}
+
+	req, err := http.NewRequest("GET", "/users/12", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rr := httptest.NewRecorder()
+	handler := Router()
+
+	handler.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+		return
+	}
+
+	// Check the response body is what we expect.
+	expected := `{"id":12,"first_name":"Krish","last_name":"Bhanushali","phone":"0987654321"}`
 	if rr.Body.String() != expected {
 		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
 	}
