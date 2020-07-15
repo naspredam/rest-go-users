@@ -6,6 +6,7 @@ ADD . /app/
 
 WORKDIR /app
 
+RUN find / -name "*test.go"  -exec rm {} \;
 RUN go build -o /urs/bin/service .
 RUN chown go:go /urs/bin/service
 
