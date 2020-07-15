@@ -10,7 +10,12 @@ restart: stop start
 logs:
 	docker-compose logs -f
 
-run-tests:
+run-all-tests:
+	docker-compose up -d db
+	sh ./test/start-local-database.sh
 	docker build -t app-test-image -f test/Dockerfile .
-	docker run --rm app-test-image
+	docker run --rm --net=host --env DATABASE_URL=root:rootpasswd@\(localhost:3306\)/app app-test-image \
+												&& echo "ALL TEST PASSED" || echo "TEST FAILURE(S)!"
 	docker rmi app-test-image
+	docker-compose stop db
+	docker-compose rm -f db
