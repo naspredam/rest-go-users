@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	// mysql dependency to be implicit
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 )

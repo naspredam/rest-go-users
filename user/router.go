@@ -7,10 +7,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var userRepository UserRepository
+var userRepository Repository
 
 func init() {
-	userRepository = UserRepositoryStruct{}
+	userRepository = RepositoryStruct{}
 }
 
 func jsonResponse(w http.ResponseWriter, code int, payload interface{}) {
