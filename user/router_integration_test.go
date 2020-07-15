@@ -130,9 +130,9 @@ func TestDeleteUserByIdIntegration(t *testing.T) {
 		t.Errorf("body must be nil")
 	}
 
-	var user *User
-	db.First(user, id)
-	if user != nil {
+	var user User
+	db.First(&user, id)
+	if user.ID != 0 {
 		t.Errorf("the user %v should have been deleted from the database", id)
 		return
 	}
